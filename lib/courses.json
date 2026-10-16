@@ -1,4 +1,4 @@
-window.OFFICE_COURSES = [
+[
   {
     "id": "powerpoint",
     "title": "Microsoft PowerPoint",
@@ -761,4 +761,4 @@ window.OFFICE_COURSES = [
       }
     ]
   }
-];
+]
