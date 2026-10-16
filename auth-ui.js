@@ -56,7 +56,7 @@ app.innerHTML='<div class="intro"><div><div class="eyebrow">ADMIN STUDIO</div><h
 }
 document.addEventListener('click',e=>{
 const b=e.target.closest('button');if(!b)return;
-if(b.dataset.authMode)showMode(b.dataset.authMode);
+if(b.dataset.authMode){location.assign('/?mode='+b.dataset.authMode);return;}
 if(b.id==='authRetry')location.reload();
 if(b.id==='adminNav')showAdmin(0);
 if(b.dataset.adminOffset!==undefined)showAdmin(Number(b.dataset.adminOffset));
