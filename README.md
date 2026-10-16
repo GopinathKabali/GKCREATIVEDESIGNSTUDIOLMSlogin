@@ -1,20 +1,23 @@
 # GK Creative Design Studio — Office LMS
 
-PowerPoint, Word, and Excel learning portal with 106 Drive-hosted video lessons and 15 supporting files.
+Three courses: PowerPoint, Word, Excel. 106 Drive-hosted video lessons and 15 supporting files.
 
-## Authentication
-Clerk manages student registration, verification, login, recovery, account settings, and logout. Use the New student, Student login, or Admin login tab on the home page.
+## Account access
+Clerk manages registration, email verification, login, account settings, and logout. The admin portal is selected with ?mode=admin; the server independently verifies admin authorization.
 
-Server requests verify Clerk session tokens, restrict authorized origins, and check the verified primary email for admin access. New accounts are students. The authorized initial administrator is gopinath88.work@gmail.com; this account must be registered and verified by its owner. There is no default password and no client-side role promotion.
+The owner account gopinath88.work@gmail.com receives admin privileges only when it is the verified primary email on the authenticated Clerk account. All other accounts, including pre-existing students, default to pending review. Email verification alone does not approve learning access.
 
-The admin dashboard provides a paginated account directory and per-course completion counts. Course links and resources are fetched only after authentication. Existing Drive sharing still controls access to the underlying files.
+The administrator reviews registered accounts and selects which courses each learner may access. Approve selected requires a verified learner email and at least one valid course. Reject and Revoke clear course grants. Review status, selected courses, latest decision timestamp, and reviewing administrator are stored in Clerk private metadata. This is the latest decision record, not an append-only audit log.
 
-Progress is stored through the server in Clerk private user metadata, within the small catalog's storage budget. Completion is learner-declared rather than proof of video watch time. Updates are serialized in each browser tab; simultaneous edits on multiple devices use the most recent saved state.
+Server endpoints filter the course catalog and progress by current permissions. Pending, rejected, revoked, and unverified learners receive no course links. Course opening rechecks permissions; open clients check access every minute and when returning to the tab. Revocation cannot retract a previously shared Drive URL, downloaded file, or a video already loaded outside the portal. Google Drive sharing is unchanged.
 
-## Deployment
-Required Vercel variables: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY (provisioned by Clerk). Never commit secret keys.
+## Admin monitoring
+The paginated account directory shows email verification, approval status, course progress, last sign-in, and last activity. View login sessions displays Clerk's session status, creation, last activity, and expiration with pagination. This is session monitoring, not a complete log of failed authentication attempts or page views.
 
-Run npm ci, npm test, npm run build. Vercel uses vercel.json to publish only the public/ build assets and api/ functions. lib/ contains server-only course data. The former public catalog.js was removed.
+## Progress
+Stored server-side in Clerk private metadata for the authenticated learner. Completion is self-reported, not video-watch verification. Changes in one browser tab are serialized; concurrent devices use the latest saved state.
 
-## Verification
-Backend tests cover unauthenticated access, student/admin separation, verified admin identity, origin checks, disabled accounts, progress validation, self-only writes, and private no-store responses. Final sign-up and admin login require the owner to complete their email verification; no account is created on their behalf.
+## Build and deployment
+npm ci; npm test; npm run build. Required environment variables: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and CLERK_SECRET_KEY, provisioned through the Vercel Clerk integration. Never commit secrets. Vercel publishes only the public/ assets and api/ functions; the course catalog stays in server-only lib/courses.json.
+
+24 tests cover session restrictions, verified admin authorization, pending users, per-course grants, revoked users, self-approval denial, admin-only session monitoring, approval validation, learner-specific writes, and UI rendering. Owner login and actual learner approval require verified accounts. The installed Clerk instance is currently in development mode; configure production Clerk keys before student launch.
